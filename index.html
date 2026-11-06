@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="MateMundo: juegos de matemática para sexto grado de la Escuela Manuel Pacífico Antequeda.">
+<title>MateMundo | Escuela Manuel Pacífico Antequeda</title>
+<style>
+:root{--bg:#10162b;--panel:#1b2544;--panel2:#26345c;--ink:#f5f7ff;--muted:#bac5e7;--green:#72e0c1;--yellow:#ffd166;--purple:#7565e8}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:system-ui,Segoe UI,sans-serif;color:var(--ink);background:radial-gradient(circle at top left,#304477,#10162b 55%)}
+header{text-align:center;padding:26px 16px 14px}header .tag{display:inline-block;border:1px solid #ffffff35;background:#ffffff15;padding:6px 13px;border-radius:99px;color:var(--green);font-weight:700;font-size:.85rem}
+h1{font-size:clamp(2.2rem,7vw,3.6rem);margin:10px 0 3px}header p{margin:0;color:var(--muted)}
+main{max-width:1000px;margin:auto;padding:14px}.panel,.stat,.topic{background:linear-gradient(145deg,var(--panel),#18213d);border:1px solid #ffffff20;border-radius:17px;padding:15px;box-shadow:0 10px 25px #0002}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0 18px}.stat{text-align:center;color:var(--muted);font-size:.85rem}.stat strong{display:block;color:var(--yellow);font-size:1.45rem}
+h2{margin:0 0 8px}.topics{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.topic p{color:var(--muted);min-height:40px;margin:7px 0 14px}.emoji{font-size:2rem}
+button{border:0;border-radius:11px;padding:11px 15px;font-weight:800;font-size:1rem;cursor:pointer;background:var(--green);color:#12243a}
+button:hover{filter:brightness(1.07);transform:translateY(-1px)}button.secondary,.choice{background:var(--panel2);border:1px solid #ffffff25;color:var(--ink)}
+button.selected{outline:2px solid var(--yellow);background:#394a7a}
+.levels{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.levels button{flex:1;min-width:100px}
+#game{display:none;margin-top:16px}.gamebar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.progress{height:9px;background:#ffffff20;border-radius:20px;overflow:hidden;margin:15px 0}.progress div{height:100%;width:0;background:var(--green);transition:width .2s}
+.question{text-align:center;font-size:clamp(1.6rem,5vw,2.5rem);font-weight:900;color:var(--yellow);padding:22px 4px}
+.answers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-width:560px;margin:auto}.answers button{font-size:1.15rem}
+.feedback{text-align:center;font-weight:800;min-height:35px;margin:17px 0 6px}.explain-actions{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin:10px 0}.explanation{background:#26345c;border:1px solid #72e0c1;border-radius:13px;padding:14px;margin:12px auto;max-width:680px;line-height:1.5}.explanation h3{margin:0 0 6px;color:var(--green)}.good{color:var(--green)}.bad{color:#ff9cae}
+.actions{text-align:center}.hidden{display:none!important}.muted{color:var(--muted);font-size:.9rem}
+.leaderboard{width:100%;border-collapse:collapse;margin-top:8px;font-size:.93rem}.leaderboard th,.leaderboard td{text-align:left;padding:9px 6px;border-bottom:1px solid #ffffff18}.leaderboard th{color:var(--muted);font-size:.8rem}.admin-badge{display:inline-block;background:#ffd166;color:#382600;padding:4px 9px;border-radius:99px;font-size:.75rem;font-weight:900;vertical-align:middle}
+#intro{position:fixed;inset:0;z-index:5;background:linear-gradient(145deg,#111a38ee,#293e72f5);display:flex;align-items:center;justify-content:center;padding:18px}
+.intro-card{width:min(600px,100%);text-align:center;background:#172342;border:1px solid #ffffff30;border-radius:24px;padding:28px;box-shadow:0 20px 70px #0008}
+.intro-logo{font-size:3.3rem}.intro-card h1{font-size:clamp(2rem,7vw,3rem)}.intro-card p{color:var(--muted);line-height:1.55}
+input{width:100%;padding:13px;border-radius:11px;border:2px solid #7181b6;background:#101a35;color:white;font-size:1rem;margin:8px 0 12px}
+footer{text-align:center;padding:25px;color:var(--muted);font-size:.85rem}
+@media(max-width:500px){.stats{gap:6px}.stat{padding:10px 5px}.answers{grid-template-columns:1fr}.topic p{min-height:0}}
+
+.avatar-row{display:flex;gap:9px;flex-wrap:wrap;margin:12px 0}
+.avatar-pick{font-size:1.65rem;min-width:58px;background:#26345c;border:2px solid #ffffff25;color:white}
+.avatar-pick.active{border-color:var(--yellow);background:#435486}
+.worlds{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px}
+.world{background:#26345c;border:1px solid #ffffff25;border-radius:14px;padding:13px;text-align:center}
+.world.locked{opacity:.55;filter:grayscale(.6)}
+.world strong{display:block;margin:5px 0}
+.mission-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:12px}
+.mission{background:#26345c;border-radius:13px;padding:12px;border:1px solid #ffffff20}
+.mission.done{border-color:var(--green);background:#1c493f}
+.mission small{color:var(--muted)}
+.mini-progress{height:7px;background:#ffffff22;border-radius:20px;overflow:hidden;margin-top:8px}
+.mini-progress span{display:block;height:100%;background:var(--green);width:0}
+
+
+.duel-players{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.duel-player{background:#26345c;border:1px solid #ffffff30;border-radius:14px;padding:12px;min-width:0}
+.duel-player h3{margin:0 0 8px}.duel-player .answers{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.duel-player button{width:100%;min-width:0;padding:10px 5px;font-size:1rem}
+.duel-score{font-size:1.4rem;color:var(--yellow);font-weight:900}
+#duel-game{display:none;margin-top:16px}
+@media(max-width:560px){.duel-players{grid-template-columns:1fr}.duel-player .answers{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+#admin-activity-toggle{position:fixed;right:14px;bottom:14px;z-index:20;display:none;box-shadow:0 6px 22px #0008}
+#admin-activity-panel{position:fixed;right:14px;bottom:72px;z-index:21;width:min(390px,calc(100vw - 28px));max-height:65vh;overflow:auto;background:#172342;border:1px solid #ffd166;border-radius:16px;padding:14px;box-shadow:0 15px 45px #000b;display:none}
+#admin-activity-panel h2{color:#ffd166;font-size:1.1rem}
+.activity-row{padding:9px 7px;border-bottom:1px solid #ffffff20;font-size:.86rem;overflow-wrap:anywhere}
+.activity-row small{display:block;color:#bac5e7;margin-top:3px}
+.activity-enter{color:#72e0c1;font-weight:800}.activity-exit{color:#ff9cae;font-weight:800}
+#extreme-toggle{background:linear-gradient(135deg,#ff5b5b,#a20f35);color:white;border:1px solid #ffb0b0;box-shadow:0 5px 18px #a20f3544}
+#extreme-hud{display:none;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;background:#4b1529;border:1px solid #ff6b83;border-radius:12px;padding:10px;margin:10px auto;max-width:560px;font-weight:900}
+#extreme-hud strong{color:#ffd166;font-size:1.15rem}
+.extreme-on{background:radial-gradient(circle at top,#4b1529,#10162b 65%)}
+@keyframes pulseDanger{50%{filter:brightness(1.35)}}
+#extreme-hud.urgent{animation:pulseDanger .55s infinite}
+
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="intro">
+ <div class="intro-card">
+  <div class="intro-logo">🏫 📚</div>
+  <div style="color:#72e0c1;font-weight:800;letter-spacing:1px">BIENVENIDOS</div>
+  <h1>Escuela Manuel Pacífico Antequeda</h1>
+  <p>Entrá a <b>MateMundo</b> para jugar, practicar y superar desafíos.</p>
+  <div class="levels" style="justify-content:center">
+   <button type="button" class="secondary selected" id="mode-login">Iniciar sesión</button>
+   <button type="button" class="secondary" id="mode-create">Crear usuario</button>
+   <button type="button" class="secondary" id="mode-admin">Ingresar como admin</button>
+  </div>
+  <form id="welcome-form">
+   <input id="player-name" maxlength="24" autocomplete="username" placeholder="Nombre de usuario" required>
+   <input id="player-password" type="password" minlength="4" autocomplete="current-password" placeholder="Contraseña (mínimo 4 caracteres)" required>
+   <button type="submit" id="auth-submit" style="width:100%">ENTRAR A MATEMUNDO 🚀</button>
+  </form>
+  <button type="button" class="secondary" id="guest-login" style="width:100%;margin-top:9px">👤 UNIRME COMO INVITADO</button>
+  <p class="muted" style="font-size:.78rem;text-align:left">⚠️ Invitado: no necesitás contraseña. Tu apodo no queda protegido: otra persona podría usarlo. El progreso se guarda solo en este navegador y puede perderse si borrás sus datos o cambiás de dispositivo. No permite acceso de administrador.</p>
+  <button type="button" class="secondary" id="google-login" style="width:100%;margin-top:9px" disabled>Continuar con Google · requiere configuración</button>
+  <p id="auth-message" class="muted" aria-live="polite">Tus datos de acceso se guardan solamente en este navegador.</p>
+  <p style="font-size:.75rem">Las cuentas de esta versión son locales: no se comparten entre dispositivos. Para iniciar con Google de verdad hace falta conectar un servicio de autenticación.</p>
+ </div>
+</div>
+<header>
+ <span class="tag">🏫 ESCUELA MANUEL PACÍFICO ANTEQUEDA</span>
+ <h1>MateMundo 🚀</h1>
+ <p>¡Tu aventura matemática de 6.º grado!</p>
+</header>
+<main>
+ <section class="panel" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+  <div>¡Hola, <b id="welcome-name">explorador/a</b>! 👋 <span id="admin-badge" class="admin-badge hidden">👑 ADMIN</span><div class="muted">¿Listo para el desafío?</div></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+   <button class="secondary" id="logout-button" type="button">↪ Salir</button>
+   <button class="secondary" id="music-toggle" type="button">🎵 Música (opcional)</button>
+  </div>
+ </section>
+ <section class="panel" id="youtube-music" style="display:none;margin-top:12px">
+  <h2>🎮 Música de Super Mario 64</h2>
+  <p class="muted">Bob-omb Battlefield · Reproductor de YouTube</p>
+  <div style="position:relative;width:100%;max-width:560px;margin:auto;aspect-ratio:16/9">
+   <iframe id="music-player" title="Super Mario 64 - Bob-omb Battlefield" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:12px" src="" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+  </div>
+ </section>
+<section class="stats">
+  <div class="stat">⭐ Puntos<strong id="points">0</strong></div>
+  <div class="stat">🏆 Récord<strong id="record">0</strong></div>
+  <div class="stat">✅ Aciertos<strong id="correct">0</strong></div>
+ </section>
+ <section class="panel">
+  <h2>📚 Elegí una materia</h2>
+  <div class="topics" id="topics">
+   <article class="topic"><div class="emoji">➕</div><h2>Operaciones</h2><p>Sumas, restas, multiplicaciones y divisiones.</p><button data-topic="Operaciones">Elegir</button></article>
+   <article class="topic"><div class="emoji">🍕</div><h2>Fracciones</h2><p>Fracciones equivalentes y cálculo de una parte.</p><button data-topic="Fracciones">Elegir</button></article>
+   <article class="topic"><div class="emoji">🔢</div><h2>Decimales</h2><p>Sumas y restas con números decimales.</p><button data-topic="Decimales">Elegir</button></article>
+   <article class="topic"><div class="emoji">📐</div><h2>Geometría</h2><p>Áreas, perímetros y figuras geométricas.</p><button data-topic="Geometría">Elegir</button></article>
+   <article class="topic"><div class="emoji">🎮</div><h2>Desafío mixto</h2><p>Preguntas variadas de todos los temas.</p><button data-topic="Mixto">Elegir</button></article>
+  </div>
+  <h2 style="margin-top:20px">⭐ Elegí la dificultad</h2>
+  <div class="levels" id="levels">
+   <button class="secondary selected" data-level="Fácil">🟢 Fácil</button>
+   <button class="secondary" data-level="Medio">🟡 Medio</button>
+   <button class="secondary" data-level="Difícil">🔴 Difícil</button>
+  </div>
+  <button type="button" id="extreme-toggle">🔥 MODO EXTREMO: DESACTIVADO</button>
+  <p class="muted" id="extreme-description">Activá el modo extremo para jugar con tiempo limitado y vidas.</p>
+  <label for="question-count" style="display:block;margin:12px 0 5px;font-weight:800">🔢 ¿Cuántas preguntas querés jugar?</label>
+  <select id="question-count" style="width:100%;padding:12px;border-radius:10px;background:#101a35;color:white;border:2px solid #7181b6;font-size:1rem;margin-bottom:12px">
+   <option value="5">5 preguntas</option><option value="10" selected>10 preguntas</option><option value="15">15 preguntas</option><option value="20">20 preguntas</option><option value="30">30 preguntas</option><option value="50">50 preguntas</option>
+  </select>
+  <button id="start">¡EMPEZAR A JUGAR! 🚀</button>
+ </section>
+ <section class="panel" id="duel-setup" style="margin-top:16px">
+  <h2>⚔️ UNO VS UNO · Duelo relámpago</h2>
+  <p class="muted">Dos jugadores responden la misma pregunta. ¡El primero que acierta se lleva el punto!</p>
+  <div class="topics" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
+   <label>🔵 Nombre del jugador 1<input id="duel-name-1" maxlength="20" value="Jugador 1" autocomplete="off"></label>
+   <label>🔴 Nombre del jugador 2<input id="duel-name-2" maxlength="20" value="Jugador 2" autocomplete="off"></label>
+  </div>
+  <p class="muted">Se juega en la misma pantalla y dispositivo. Cada jugador toca solamente su columna de respuestas. Se usa la materia, dificultad y cantidad de preguntas que elegiste arriba.</p>
+  <button id="duel-start" type="button">⚔️ ¡EMPEZAR EL DUELO!</button>
+  <a class="button" href="/multijugador.html" style="display:block;text-align:center;text-decoration:none;margin-top:10px;background:#13a66b;color:white;padding:13px;border-radius:12px;font-weight:900">🌐 JUGAR MULTIJUGADOR ONLINE</a>
+ </section>
+ <section class="panel" id="duel-game">
+  <div class="gamebar"><button class="secondary" id="duel-menu" type="button">← Salir del duelo</button><b id="duel-category">Duelo matemático</b><span class="muted" id="duel-count">Pregunta 1/10</span></div>
+  <div class="progress"><div id="duel-bar"></div></div>
+  <div class="stats"><div class="stat" id="duel-score1-label">🔵 Jugador 1<strong class="duel-score" id="duel-score1">0</strong></div><div class="stat">⏱️ Tiempo<strong id="duel-time">10 s</strong></div><div class="stat" id="duel-score2-label">🔴 Jugador 2<strong class="duel-score" id="duel-score2">0</strong></div></div>
+  <div class="question" id="duel-question"></div>
+  <div class="duel-players">
+   <div class="duel-player"><h3 id="duel-player1-title">🔵 Jugador 1</h3><div class="answers" id="duel-answers1"></div></div>
+   <div class="duel-player"><h3 id="duel-player2-title">🔴 Jugador 2</h3><div class="answers" id="duel-answers2"></div></div>
+  </div>
+  <div class="feedback" id="duel-feedback" aria-live="polite"></div>
+  <div class="actions"><button id="duel-next" type="button" class="hidden">Siguiente pregunta ➜</button></div>
+ </section>
+ <section class="panel" id="game">
+  <div class="gamebar"><button class="secondary" id="menu">← Menú</button><b id="category">Operaciones</b><span class="muted" id="count">Pregunta 1/10</span></div>
+  <div class="progress"><div id="bar"></div></div>
+  <div id="extreme-hud"><span>⏱️ Tiempo: <strong id="extreme-time">12</strong>s</span><span>❤️ Vidas: <strong id="extreme-lives">3</strong></span><span>🔥 x2 puntos</span></div>
+  <div class="question" id="question"></div>
+  <div class="answers" id="answers"></div>
+  <div class="feedback" id="feedback" aria-live="polite"></div>
+  <div class="explain-actions hidden" id="explain-actions"><button type="button" id="show-explanation">📘 Explicame cómo se hace</button><button type="button" class="secondary" id="skip-explanation">Omitir explicación</button></div>
+  <div class="explanation hidden" id="explanation-box" aria-live="polite"></div>
+  <div class="actions"><button id="next" class="hidden">Siguiente ➜</button></div>
+ </section>
+
+ <section class="panel" style="margin-top:16px" id="avatar-panel">
+  <h2>🧑‍🚀 Elegí tu personaje</h2>
+  <p class="muted">Elegí un avatar para representar tu aventura.</p>
+  <div class="avatar-row" id="avatar-picker">
+   <button class="avatar-pick active" type="button" data-avatar="🧑‍🚀" aria-label="Astronauta">🧑‍🚀</button>
+   <button class="avatar-pick" type="button" data-avatar="🦊" aria-label="Zorro">🦊</button>
+   <button class="avatar-pick" type="button" data-avatar="🐼" aria-label="Panda">🐼</button>
+   <button class="avatar-pick" type="button" data-avatar="🦖" aria-label="Dinosaurio">🦖</button>
+   <button class="avatar-pick" type="button" data-avatar="🐸" aria-label="Rana">🐸</button>
+   <button class="avatar-pick" type="button" data-avatar="🦄" aria-label="Unicornio">🦄</button>
+  </div>
+  <p class="muted">Tu personaje: <strong id="current-avatar">🧑‍🚀</strong></p>
+ </section>
+ <section class="panel" style="margin-top:16px">
+  <h2>📅 Misiones de hoy</h2>
+  <p class="muted">¡Completá estas metas y preparate para la Semana Estudiantil!</p>
+  <div class="mission-list" id="daily-missions">
+   <div class="mission" id="mission-correct"><strong>🎯 5 respuestas correctas</strong><div><span id="mission-correct-count">0/5</span></div><div class="mini-progress"><span id="mission-correct-bar"></span></div></div>
+   <div class="mission" id="mission-round"><strong>🏁 Completar una partida</strong><div><span id="mission-round-count">0/1</span></div><div class="mini-progress"><span id="mission-round-bar"></span></div></div>
+   <div class="mission" id="mission-points"><strong>⭐ Ganar 50 puntos</strong><div><span id="mission-points-count">0/50</span></div><div class="mini-progress"><span id="mission-points-bar"></span></div></div>
+  </div>
+ </section>
+ <section class="panel" style="margin-top:16px">
+  <h2>🗺️ Mundo de aventuras</h2>
+  <p class="muted">Desbloqueá nuevos mundos respondiendo correctamente. Tu avance se guarda en este navegador.</p>
+  <div class="worlds" id="adventure-worlds">
+   <div class="world" id="world-1"><div style="font-size:2rem">🌳</div><strong>1. Bosque Numérico</strong><small>Disponible desde el inicio</small></div>
+   <div class="world locked" id="world-2"><div style="font-size:2rem">🏜️</div><strong>2. Desierto Decimal</strong><small>Necesitás 5 aciertos</small></div>
+   <div class="world locked" id="world-3"><div style="font-size:2rem">🏰</div><strong>3. Castillo de Fracciones</strong><small>Necesitás 15 aciertos</small></div>
+   <div class="world locked" id="world-4"><div style="font-size:2rem">🚀</div><strong>4. Galaxia Geométrica</strong><small>Necesitás 30 aciertos</small></div>
+  </div>
+  <p class="muted" id="world-status">¡Tu aventura comienza en el Bosque Numérico!</p>
+ </section>
+
+ <section class="panel" style="margin-top:16px">
+  <h2>🌍 Ranking de MateMundo — Top 10</h2>
+  <p class="muted">Personajes de ejemplo (bots ficticios) y tu mejor puntaje en este dispositivo. No es un ranking mundial conectado. La cuenta ADMIN se configura con contraseña y queda guardada solo en este navegador.</p>
+  <table class="leaderboard"><thead><tr><th>Puesto</th><th>Jugador</th><th>Puntos</th></tr></thead><tbody id="ranking"></tbody></table>
+ </section>
+ <section class="panel" style="margin-top:16px">
+  <h2>🏅 Mis logros</h2><p id="achievements" class="muted">¡Jugá para desbloquear medallas!</p>
+  <button class="secondary" id="reset">Reiniciar puntos y récord</button>
+ </section>
+</main>
+<button id="admin-activity-toggle" type="button">👑 Actividad ADMIN</button>
+<section id="admin-activity-panel" aria-label="Actividad de usuarios">
+ <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+  <h2>👑 Actividad de usuarios</h2>
+  <button type="button" class="secondary" id="admin-activity-close">✕</button>
+ </div>
+ <p class="muted" id="activity-summary">Cargando actividad...</p>
+ <div id="admin-activity-list"></div>
+ <p class="muted" style="font-size:.75rem;margin-top:10px">Historial local de este navegador. No representa actividad de otros dispositivos hasta conectar una base de datos compartida.</p>
+</section>
+<footer>MateMundo · Escuela Manuel Pacífico Antequeda · ¡Aprender también es jugar! 💚</footer>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+let topic='Operaciones',level='Fácil',points=0,record=0,totalCorrect=0,round=0,roundPoints=0,answer=null,locked=true,player='',isAdmin=false,authMode='login',currentExplanation='';
+let extremeMode=false,extremeLives=3,extremeTime=12,extremeTimer=null,extremeEnded=false,questionLimit=10;
+let duelTimer=null,duelTime=10,duelRound=0,duelAnswer=null,duelLocked=false,duelScores=[0,0],duelNames=['Jugador 1','Jugador 2'],duelEnded=false;
+let avatar='🧑‍🚀';
+const todayKey=()=>new Date().toLocaleDateString('en-CA');
+function dailyData(){try{let d=JSON.parse(localStorage.getItem('mateMundoDaily')||'{}');if(d.date!==todayKey())d={date:todayKey(),correct:0,rounds:0,points:0};return d}catch(e){return {date:todayKey(),correct:0,rounds:0,points:0}}}
+let daily=dailyData();
+try{avatar=localStorage.getItem('mateMundoAvatar')||'🧑‍🚀'}catch(e){}
+
+try{points=Number(localStorage.getItem('mateMundoPoints'))||0;record=Number(localStorage.getItem('mateMundoRecord'))||0;totalCorrect=Number(localStorage.getItem('mateMundoCorrect'))||0}catch(e){}
+const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+function save(){try{localStorage.setItem('mateMundoPoints',points);localStorage.setItem('mateMundoRecord',record);localStorage.setItem('mateMundoCorrect',totalCorrect);localStorage.setItem('mateMundoPlayer',player)}catch(e){}}
+
+function renderDaily(){
+ const items=[['correct',Math.min(5,daily.correct),5],['round',Math.min(1,daily.rounds),1],['points',Math.min(50,daily.points),50]];
+ items.forEach(([id,n,max])=>{const el=$('mission-'+id);el.classList.toggle('done',n>=max);$( 'mission-'+id+'-count').textContent=n+'/'+max;$('mission-'+id+'-bar').style.width=(n/max*100)+'%'});
+}
+function renderWorlds(){
+ const thresholds=[0,5,15,30],names=['Bosque Numérico','Desierto Decimal','Castillo de Fracciones','Galaxia Geométrica'];
+ let unlocked=thresholds.filter(n=>totalCorrect>=n).length;
+ thresholds.forEach((n,i)=>{const el=$('world-'+(i+1));el.classList.toggle('locked',totalCorrect<n);el.querySelector('small').textContent=totalCorrect>=n?'¡Desbloqueado!':`Necesitás ${n} aciertos`});
+ $('world-status').textContent=`Tenés ${totalCorrect} aciertos y desbloqueaste ${unlocked} de 4 mundos. ¡Seguí jugando!`;
+}
+function saveDaily(){try{localStorage.setItem('mateMundoDaily',JSON.stringify(daily))}catch(e){}renderDaily()}
+function stats(){$('current-avatar').textContent=avatar;$('avatar-picker').querySelectorAll('[data-avatar]').forEach(b=>b.classList.toggle('active',b.dataset.avatar===avatar));renderDaily();renderWorlds();$('points').textContent=points;$('record').textContent=record;$('correct').textContent=totalCorrect;$('achievements').textContent=totalCorrect>=20?'🏆 Genio matemático':totalCorrect>=10?'🥇 Súper estudiante':totalCorrect>=5?'🥈 Buen trabajo':totalCorrect>=1?'🥉 Primer acierto':'¡Jugá para desbloquear medallas!';renderRanking()}
+const bots=[['🥇','MarioPro 🤖',985],['🥈','LuigiMaster 🤖',870],['🥉','YoshiGamer 🤖',760],['4','BowserXD 🤖',640],['5','PeachStar 🤖',590],['6','ToadRunner 🤖',510],['7','KoopaKing 🤖',430],['8','WarioMath 🤖',350],['9','DaisyPlay 🤖',280]];
+function renderRanking(){let rows=bots.map(x=>({medal:x[0],name:x[1],score:x[2],mine:false}));if(player)rows.push({medal:'⭐',name:player+(isAdmin?' 👑 ADMIN':' (vos)'),score:record,mine:true});rows.sort((a,b)=>b.score-a.score);$('ranking').innerHTML='';rows.slice(0,10).forEach((x,i)=>{let tr=document.createElement('tr');if(x.mine)tr.style.background='#7565e833';[i+1,x.name,x.score].forEach(v=>{let td=document.createElement('td');td.textContent=v;tr.appendChild(td)});$('ranking').appendChild(tr)})}
+
+async function passwordHash(value){const data=new TextEncoder().encode(value);const digest=await crypto.subtle.digest('SHA-256',data);return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function getAccounts(){try{return JSON.parse(localStorage.getItem('mateMundoAccounts')||'{}')}catch(e){return {}}}
+const ACTIVITY_KEY='mateMundoActivityLog';
+function readActivity(){try{const x=JSON.parse(localStorage.getItem(ACTIVITY_KEY)||'[]');return Array.isArray(x)?x:[]}catch(e){return []}}
+function logActivity(action,name){
+ try{
+  const rows=readActivity();
+  rows.unshift({action,name:String(name||'Usuario').slice(0,24),time:new Date().toISOString()});
+  localStorage.setItem(ACTIVITY_KEY,JSON.stringify(rows.slice(0,2000)));
+ }catch(e){}
+ renderActivity();
+}
+function renderActivity(){
+ const rows=readActivity(),list=$('admin-activity-list');
+ if(!list)return;
+ $('activity-summary').textContent=`${rows.length} movimientos guardados en este navegador`;
+ list.textContent='';
+ if(!rows.length){list.textContent='Todavía no hay movimientos.';return}
+ rows.forEach(item=>{
+  const div=document.createElement('div');div.className='activity-row';
+  const title=document.createElement('span');title.className=item.action==='ENTRÓ'?'activity-enter':'activity-exit';
+  title.textContent=(item.action==='ENTRÓ'?'🟢 ENTRÓ · ':'🔴 SALIÓ · ')+item.name;
+  const time=document.createElement('small');const date=new Date(item.time);
+  time.textContent=Number.isNaN(date.getTime())?'Fecha desconocida':date.toLocaleString('es-AR');
+  div.append(title,time);list.appendChild(div);
+ });
+}
+function showAdminActivity(){
+ const allowed=isAdmin;
+ $('admin-activity-toggle').style.display=allowed?'block':'none';
+ if(!allowed)$('admin-activity-panel').style.display='none';
+}
+
+function setMode(mode){authMode=mode;[['login','mode-login'],['create','mode-create'],['admin','mode-admin']].forEach(([m,id])=>$(id).classList.toggle('selected',m===mode));$('auth-submit').textContent=mode==='login'?'ENTRAR A MATEMUNDO 🚀':mode==='create'?'CREAR MI USUARIO ✨':'ENTRAR COMO ADMIN 👑';$('player-name').value=mode==='admin'?'MARTIN AGUERO':'';$('player-name').readOnly=mode==='admin';$('player-password').value='';$('player-password').autocomplete=mode==='login'?'current-password':'new-password';$('auth-message').textContent=mode==='admin'?'Ingresá con la cuenta MARTIN AGUERO y tu contraseña de administrador.':'Tus datos de acceso se guardan solamente en este navegador.'}
+$('mode-login').onclick=()=>setMode('login');$('mode-create').onclick=()=>setMode('create');$('mode-admin').onclick=()=>setMode('admin');
+$('welcome-form').addEventListener('submit',async e=>{e.preventDefault();const name=$('player-name').value.trim(),pass=$('player-password').value;if(!name||pass.length<4){$('auth-message').textContent='Escribí un usuario y una contraseña de al menos 4 caracteres.';return}const key=name.toLocaleLowerCase('es-AR');const hash=await passwordHash(pass);let accounts=getAccounts();
+ if(authMode==='create'){if(key==='martin aguero'||accounts[key]){$('auth-message').textContent='Ese usuario ya existe o está reservado. Elegí otro.';return}accounts[key]={name,hash};localStorage.setItem('mateMundoAccounts',JSON.stringify(accounts));$('auth-message').textContent='¡Cuenta creada! Ahora podés iniciar sesión.';setMode('login');$('player-name').value=name;return}
+ if(authMode==='admin'){const adminHash='0aa3252f32782d88bb5177ca2e7a51833c6a425c94177a703fe22dcfc27ae626';if(name.toLocaleUpperCase('es-AR')!=='MARTIN AGUERO'||hash!==adminHash){$('auth-message').textContent='Nombre o contraseña de administrador incorrectos.';return}localStorage.setItem('mateMundoAdminHash',hash);isAdmin=true;player='MARTIN AGUERO';}
+ else{const account=accounts[key];if(!account||account.hash!==hash){$('auth-message').textContent='Usuario o contraseña incorrectos. Si todavía no tenés cuenta, elegí “Crear usuario”.';return}player=account.name;isAdmin=false}
+ try{sessionStorage.removeItem('mateMundoGuest');sessionStorage.setItem('mateMundoActive','1')}catch(e){}logActivity('ENTRÓ',player);$('welcome-name').textContent=player;$('admin-badge').classList.toggle('hidden',!isAdmin);showAdminActivity();$('intro').style.display='none';stats();
+});
+$('guest-login').onclick=()=>{const raw=prompt('Elegí un apodo para entrar como invitado (máximo 24 caracteres):');if(raw===null)return;const name=raw.trim().replace(/\s+/g,' ').slice(0,24);if(name.length<2){$('auth-message').textContent='El apodo debe tener al menos 2 caracteres.';return}if(name.toLocaleLowerCase('es-AR')==='martin aguero'){$('auth-message').textContent='Ese apodo está reservado.';return}player=name;isAdmin=false;try{sessionStorage.setItem('mateMundoGuest','1');sessionStorage.setItem('mateMundoActive','1')}catch(e){}logActivity('ENTRÓ',player);$('welcome-name').textContent=player;$('admin-badge').classList.add('hidden');showAdminActivity();$('intro').style.display='none';$('auth-message').textContent='';stats();};
+$('admin-activity-toggle').onclick=()=>{$('admin-activity-panel').style.display=$('admin-activity-panel').style.display==='block'?'none':'block';renderActivity()};
+$('admin-activity-close').onclick=()=>{$('admin-activity-panel').style.display='none'};
+$('logout-button').onclick=()=>{if(player){logActivity('SALIÓ',player)}try{sessionStorage.removeItem('mateMundoActive');sessionStorage.removeItem('mateMundoGuest')}catch(e){}player='';isAdmin=false;$('admin-badge').classList.add('hidden');showAdminActivity();$('intro').style.display='flex';setMode('login');$('auth-message').textContent='Cerraste sesión correctamente.'};
+window.addEventListener('pagehide',()=>{try{if(player&&sessionStorage.getItem('mateMundoActive')==='1'){logActivity('SALIÓ',player);sessionStorage.removeItem('mateMundoActive')}}catch(e){}});
+window.addEventListener('storage',e=>{if(e.key===ACTIVITY_KEY&&isAdmin)renderActivity()});
+$('google-login').onclick=()=>{};
+$('avatar-picker').addEventListener('click',e=>{const b=e.target.closest('[data-avatar]');if(!b)return;avatar=b.dataset.avatar;try{localStorage.setItem('mateMundoAvatar',avatar)}catch(e){}stats()});
+
+$('topics').addEventListener('click',e=>{let b=e.target.closest('[data-topic]');if(!b)return;topic=b.dataset.topic;$('topics').querySelectorAll('button').forEach(x=>x.classList.toggle('selected',x===b))});
+$('levels').addEventListener('click',e=>{let b=e.target.closest('[data-level]');if(!b)return;level=b.dataset.level;$('levels').querySelectorAll('button').forEach(x=>x.classList.toggle('selected',x===b))});
+function generate(){
+ let type=topic==='Mixto'?['Operaciones','Fracciones','Decimales','Geometría'][rand(0,3)]:topic;
+ let max=level==='Fácil'?12:level==='Medio'?35:100,a,b,ans,text;
+ if(type==='Operaciones'){let op=['+','−','×','÷'][rand(0,3)];a=rand(2,max);b=rand(2,Math.min(max,15));if(op==='÷'){ans=rand(2,max);a=ans*b}else if(op==='+')ans=a+b;else if(op==='−'){if(b>a)[a,b]=[b,a];ans=a-b}else ans=a*b;text=`${a} ${op} ${b} = ?`;if(level==='Difícil'&&rand(0,1)){let c=rand(2,12);ans+=c;text=`(${text.replace(' = ?','')}) + ${c} = ?`}}
+ else if(type==='Fracciones'){let den=rand(2,8),num=rand(1,den-1),whole=rand(2,12);if(level==='Difícil'){ans=`${num*2}/${den*2}`;text=`¿Qué fracción equivale a ${num}/${den}?`}else{ans=num*whole;text=`¿Cuánto es ${num}/${den} de ${den*whole}?`}}
+ else if(type==='Decimales'){a=rand(10,99)/10;b=rand(10,99)/10;let op=rand(0,1)?'+':'−';if(op==='−'&&b>a)[a,b]=[b,a];ans=Number((op==='+'?a+b:a-b).toFixed(1));text=`${a.toFixed(1)} ${op} ${b.toFixed(1)} = ?`}
+ else{a=rand(2,18);b=rand(2,18);if(rand(0,1)){ans=a*b;text=`Área de un rectángulo de ${a} cm × ${b} cm (cm²):`}else{ans=4*a;text=`Perímetro de un cuadrado de lado ${a} cm:`}}
+ let explanation='';
+ if(type==='Operaciones'){
+   const clean=text.replace(' = ?','');
+   if(text.includes('÷')) explanation=`Para dividir ${clean}, buscá qué número multiplicado por el divisor da el dividendo. El resultado es ${ans}.`;
+   else if(text.includes('×')) explanation=`Para multiplicar, podés sumar el primer número tantas veces como indica el segundo. ${clean} da ${ans}.`;
+   else if(text.includes('−')) explanation=`Para restar, quitá ${b} a ${a}. La diferencia es ${ans}.`;
+   else explanation=`Para sumar, juntá las cantidades: ${clean}. El total es ${ans}.`;
+ } else if(type==='Fracciones'){
+   if(level==='Difícil') explanation=`Las fracciones equivalentes representan la misma cantidad. Multiplicá el numerador y el denominador de ${text.match(/\d+\/\d+/)?.[0]||'la fracción'} por 2. Así obtenés ${ans}.`;
+   else explanation=`Para calcular una fracción de una cantidad, dividí la cantidad por el denominador y multiplicá por el numerador. El resultado es ${ans}.`;
+ } else if(type==='Decimales') explanation=`Acomodá las comas decimales una debajo de la otra y resolvé la cuenta. ${text.replace(' = ?','')} = ${Number(ans).toFixed(1)}.`;
+ else explanation=text.startsWith('Área')?`El área del rectángulo se calcula multiplicando base por altura: ${a} × ${b} = ${ans} cm².`:`El perímetro del cuadrado se calcula sumando sus cuatro lados: 4 × ${a} = ${ans} cm.`;
+ return {type,text,ans,explanation};
+}
+function stopDuelTimer(){if(duelTimer){clearInterval(duelTimer);duelTimer=null}}
+function updateDuelScores(){ $('duel-score1').textContent=duelScores[0];$('duel-score2').textContent=duelScores[1];$('duel-player1-title').textContent='🔵 '+duelNames[0];$('duel-player2-title').textContent='🔴 '+duelNames[1];$('duel-score1-label').childNodes[0].textContent='🔵 '+duelNames[0];$('duel-score2-label').childNodes[0].textContent='🔴 '+duelNames[1]; }
+function startDuel(){
+ const n1=$('duel-name-1').value.trim().slice(0,20)||'Jugador 1',n2=$('duel-name-2').value.trim().slice(0,20)||'Jugador 2';
+ if(n1.toLocaleLowerCase('es-AR')===n2.toLocaleLowerCase('es-AR')){$('duel-feedback').textContent='Elegí dos nombres diferentes para jugar.';return}
+ duelNames=[n1,n2];duelScores=[0,0];duelRound=0;duelEnded=false;stopDuelTimer();stopExtremeTimer();$('game').style.display='none';$('duel-setup').style.display='none';$('duel-game').style.display='block';updateDuelScores();$('duel-game').scrollIntoView({behavior:'smooth',block:'start'});duelQuestion();
+}
+function duelQuestion(){
+ stopDuelTimer();duelRound++;duelLocked=false;duelTime=10;const q=generate();duelAnswer=q.ans;$('duel-category').textContent=q.type;$('duel-count').textContent=`Pregunta ${duelRound}/${questionLimit}`;$('duel-bar').style.width=((duelRound-1)/questionLimit*100)+'%';$('duel-question').textContent=q.text;$('duel-time').textContent=duelTime+' s';$('duel-feedback').className='feedback';$('duel-feedback').textContent='¡Rápido! El primero que acierta gana el punto.';$('duel-next').classList.add('hidden');
+ let opts=[duelAnswer];while(opts.length<4){let delta=rand(1,Math.max(4,Math.ceil(Math.abs(Number(duelAnswer)||5)*.25)));let v=typeof duelAnswer==='number'?duelAnswer+(rand(0,1)?delta:-delta):`${rand(1,8)}/${rand(2,12)}`;if(!opts.some(x=>String(x)===String(v)))opts.push(v)}
+ opts.sort(()=>Math.random()-.5);
+ [1,2].forEach((playerIndex)=>{const wrap=$('duel-answers'+playerIndex);wrap.innerHTML='';opts.forEach(v=>{const b=document.createElement('button');b.type='button';b.className='choice';b.textContent=v;b.addEventListener('click',()=>duelChoose(playerIndex-1,v,b));wrap.appendChild(b)})});
+ duelTimer=setInterval(()=>{duelTime--; $('duel-time').textContent=duelTime+' s';if(duelTime<=0){stopDuelTimer();duelLocked=true;$('duel-feedback').textContent='⏰ ¡Se acabó el tiempo! Nadie gana este punto.';$('duel-answers1').querySelectorAll('button').forEach(b=>b.disabled=true);$('duel-answers2').querySelectorAll('button').forEach(b=>b.disabled=true);showDuelNext()}},1000);
+}
+function duelChoose(playerIndex,value,button){if(duelLocked)return;if(String(value)===String(duelAnswer)){duelLocked=true;stopDuelTimer();duelScores[playerIndex]++;updateDuelScores();$('duel-feedback').textContent='🏆 ¡'+duelNames[playerIndex]+' respondió primero y gana el punto!';$('duel-feedback').classList.add('good');$('duel-answers1').querySelectorAll('button').forEach(b=>b.disabled=true);$('duel-answers2').querySelectorAll('button').forEach(b=>b.disabled=true);showDuelNext()}else{button.disabled=true;$('duel-feedback').textContent='❌ '+duelNames[playerIndex]+' falló. ¡Todavía puede ganar el otro!';}}
+function showDuelNext(){if(duelRound>=questionLimit){duelEnded=true;$('duel-bar').style.width='100%';$('duel-next').textContent='Ver resultado 🏆'}else $('duel-next').textContent='Siguiente pregunta ➜';$('duel-next').classList.remove('hidden')}
+function finishDuel(){stopDuelTimer();$('duel-question').textContent='🏆 ¡DUELO TERMINADO!';$('duel-answers1').innerHTML='';$('duel-answers2').innerHTML='';$('duel-feedback').classList.remove('good');if(duelScores[0]===duelScores[1])$('duel-feedback').textContent=`¡EMPATE! ${duelScores[0]} a ${duelScores[1]}. ¡Hay que desempatar!`;else{const winner=duelScores[0]>duelScores[1]?0:1;$('duel-feedback').textContent=`🥇 ¡${duelNames[winner]} GANA EL DUELO! Resultado: ${duelScores[0]} a ${duelScores[1]}. ¡Felicitaciones!`}$('duel-next').textContent='Jugar revancha 🔄';$('duel-next').classList.remove('hidden')}
+$('duel-start').onclick=startDuel;
+$('duel-next').onclick=()=>{if($('duel-question').textContent==='🏆 ¡DUELO TERMINADO!'){startDuel();return}if(duelRound>=questionLimit){finishDuel();return}duelQuestion()};
+$('duel-menu').onclick=()=>{stopDuelTimer();$('duel-game').style.display='none';$('duel-setup').style.display='block';$('duel-setup').scrollIntoView({behavior:'smooth',block:'center'})};
+function stopExtremeTimer(){if(extremeTimer){clearInterval(extremeTimer);extremeTimer=null}}
+function updateExtremeHud(){ $('extreme-lives').textContent=extremeLives; $('extreme-time').textContent=extremeTime; $('extreme-hud').classList.toggle('urgent',extremeTime<=4); }
+$('question-count').onchange=()=>{questionLimit=Number($('question-count').value)||10};
+$('extreme-toggle').onclick=()=>{extremeMode=!extremeMode;$('extreme-toggle').textContent=extremeMode?'🔥 MODO EXTREMO: ACTIVADO':'🔥 MODO EXTREMO: DESACTIVADO';$('extreme-description').textContent=extremeMode?`${questionLimit} preguntas · 12 segundos por pregunta · 3 vidas · puntos dobles · sin pistas.`:'Activá el modo extremo para jugar con tiempo limitado y vidas.';$('extreme-toggle').classList.toggle('selected',extremeMode)};
+function start(){if(!player){$('intro').style.display='flex';$('player-name').focus();return}stopExtremeTimer();round=0;roundPoints=0;extremeLives=3;extremeEnded=false;$('extreme-hud').style.display=extremeMode?'flex':'none';document.body.classList.toggle('extreme-on',extremeMode);$('game').style.display='block';$('game').scrollIntoView({behavior:'smooth',block:'nearest'});question()}
+function question(){stopExtremeTimer();locked=false;round++;let q=generate();answer=q.ans;currentExplanation=q.explanation||'Revisá la operación paso a paso y comprobá el resultado.';$('category').textContent=q.type;$('count').textContent=`Pregunta ${round}/${questionLimit}`;$('bar').style.width=((round-1)/questionLimit*100)+'%';$('question').textContent=q.text;$('feedback').textContent='';$('feedback').className='feedback';$('explain-actions').classList.add('hidden');$('explanation-box').classList.add('hidden');$('explanation-box').innerHTML='';$('next').classList.add('hidden');$('next').textContent=round===questionLimit?'Ver resultado 🏆':'Siguiente ➜';$('answers').innerHTML='';let opts=[answer];while(opts.length<4){let delta=rand(1,Math.max(4,Math.ceil(Math.abs(Number(answer)||5)*.25)));let v=typeof answer==='number'?answer+(rand(0,1)?delta:-delta):`${rand(1,8)}/${rand(2,12)}`;if(!opts.some(x=>String(x)===String(v)))opts.push(v)}opts.sort(()=>Math.random()-.5).forEach(v=>{let b=document.createElement('button');b.className='choice';b.textContent=v;b.addEventListener('click',()=>choose(v));$('answers').appendChild(b)});if(extremeMode){extremeTime=12;updateExtremeHud();extremeTimer=setInterval(()=>{extremeTime--;updateExtremeHud();if(extremeTime<=0){stopExtremeTimer();choose(null,true)}},1000)}}
+function choose(v,timedOut=false){if(locked)return;stopExtremeTimer();locked=true;let right=String(v)===String(answer);$('answers').querySelectorAll('button').forEach(b=>{b.disabled=true;if(String(b.textContent)===String(answer))b.style.borderColor='#72e0c1'});if(right){let earned=(level==='Fácil'?10:level==='Medio'?20:30)*(extremeMode?2:1);points+=earned;roundPoints+=earned;totalCorrect++;daily.correct++;daily.points+=earned;saveDaily();$('feedback').textContent=`🎉 ¡Correcto! +${earned} puntos${extremeMode?' (BONUS EXTREMO x2)':''}`;$('feedback').classList.add('good');record=Math.max(record,points);save();stats();$('next').classList.remove('hidden')}else{if(extremeMode){extremeLives--;updateExtremeHud();$('feedback').textContent=timedOut?'⏰ ¡Se acabó el tiempo!':'💥 ¡Fallaste!';$('feedback').textContent+=' La respuesta era '+String(answer)+'.';$('feedback').classList.add('bad');if(extremeLives<=0){$('next').classList.add('hidden');finishExtreme();return}$('next').classList.remove('hidden')}else{$('feedback').textContent='❌ ¡No pasa nada! Podés aprender cómo resolverla o seguir.';$('feedback').classList.add('bad');$('explain-actions').classList.remove('hidden')}} }
+function finish(){daily.rounds++;saveDaily();$('bar').style.width='100%';$('question').textContent='¡MISIÓN COMPLETADA! 🏆';$('answers').innerHTML='';$('feedback').textContent=`${player}, ganaste ${roundPoints} puntos en esta partida. ¡Excelente trabajo!\n\n💚 ¡GRACIAS A TODOS! Gracias a los estudiantes, docentes y familias de la Escuela Manuel Pacífico Antequeda por participar, aprender y divertirse con MateMundo. ¡Esta aventura matemática la hacemos entre todos!`; $('feedback').style.whiteSpace='pre-line';$('next').textContent='Jugar otra vez 🔄'}
+function finishExtreme(){if(extremeEnded)return;extremeEnded=true;stopExtremeTimer();daily.rounds++;saveDaily();$('bar').style.width=(Math.min(round,questionLimit)/questionLimit*100)+'%';$('question').textContent='💀 FIN DEL MODO EXTREMO';$('answers').innerHTML='';$('explain-actions').classList.add('hidden');$('explanation-box').classList.add('hidden');$('feedback').textContent=`${player}, te quedaste sin vidas en la pregunta ${round}/${questionLimit}. Ganaste ${roundPoints} puntos. ${roundPoints>=200?'¡IMPRESIONANTE!':'¡Volvé a intentarlo y superá tu récord!'}`;$('next').textContent='Reintentar 🔥';$('next').classList.remove('hidden')}
+$('show-explanation').onclick=()=>{$('explanation-box').innerHTML='<h3>📘 ¡Así se resuelve!</h3><p>'+currentExplanation+'</p><p><strong>Respuesta correcta: '+String(answer)+'</strong></p>';$('explanation-box').classList.remove('hidden');$('explain-actions').classList.add('hidden');$('next').classList.remove('hidden')};
+$('skip-explanation').onclick=()=>{$('explain-actions').classList.add('hidden');$('feedback').textContent='¡Seguimos! La respuesta era '+String(answer)+'.';$('next').classList.remove('hidden')};
+$('start').onclick=start;$('next').onclick=()=>{if(extremeEnded||$('question').textContent==='¡MISIÓN COMPLETADA! 🏆'||$('question').textContent==='🏆 ¡SOBREVIVISTE AL MODO EXTREMO!')start();else if(round>=questionLimit){stopExtremeTimer();if(extremeMode){extremeEnded=true;$('question').textContent='🏆 ¡SOBREVIVISTE AL MODO EXTREMO!';$('answers').innerHTML='';$('feedback').textContent=`¡Increíble ${player}! Completaste las ${questionLimit} preguntas con ${extremeLives} vidas restantes y ganaste ${roundPoints} puntos.`;$('next').textContent='Jugar otra vez 🔥'}else finish()}else question()};$('menu').onclick=()=>{stopExtremeTimer();$('game').style.display='none';document.body.classList.remove('extreme-on');$('start').scrollIntoView({behavior:'smooth',block:'center'})};
+$('reset').onclick=()=>{if(confirm('¿Querés reiniciar tus puntos, récord y logros?')){points=record=totalCorrect=0;save();stats()}};
+let musicOn=false;
+function startMusic(){const panel=$('youtube-music'),player=$('music-player');musicOn=true;panel.style.display='block';player.src='https://www.youtube-nocookie.com/embed/bmP3UHXYi28?autoplay=1&rel=0';$('music-toggle').textContent='🔇 Apagar música'}
+function stopMusic(){musicOn=false;$('music-player').src='';$('youtube-music').style.display='none';$('music-toggle').textContent='🎵 Música automática'}
+$('music-toggle').onclick=()=>{if(musicOn)stopMusic();else startMusic()};
+// No se carga contenido externo al abrir la página: ahorra datos y acelera el inicio. La música se carga solo si el usuario la activa.
+showAdminActivity();stats();
+})();
+</script>
+</body>
+</html>
